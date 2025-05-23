@@ -8,6 +8,7 @@
 
 ### Usage:
 Update bicep parameters in `main.bicepparam` with your values.
+
 Deploy by running: `New-AzResourceGroupDeployment -Name <replaceMe> -ResourceGroupName <replaceMe> -TemplateFile ./main.bicep -TemplateParameterFile ./main.bicepparam`.
 
 ### What to expect:
