@@ -150,6 +150,34 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
   name: 'default'
   parent: storage
+  properties: {
+    cors: {
+      corsRules: env == 'dev' ? [
+        {
+          allowedOrigins: [
+            'https://documentintelligence.ai.azure.com'
+          ]
+          allowedMethods: [
+            'DELETE'
+            'GET'
+            'HEAD'
+            'MERGE'
+            'OPTIONS'
+            'PATCH'
+            'POST'
+            'PUT'
+          ]
+          maxAgeInSeconds: 120
+          exposedHeaders: [
+            '*'
+          ]
+          allowedHeaders: [
+            '*'
+          ]
+        }
+      ] : []
+    }
+  }
 }
 
 resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
@@ -194,12 +222,21 @@ resource storageDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneG
   }
 }
 
-resource containerRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+resource containerRole1 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
   name: guid(docIntel.name, container.id, 'storage-blob-reader')
   scope: container
   properties: {
     principalId: docIntel.identity.principalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1')
+  }
+}
+
+resource containerRole2 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = if (env == 'dev') {
+  name: guid(docIntel.name, container.id, 'storage-blob-contributor')
+  scope: container
+  properties: {
+    principalId: docIntel.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
   }
 }
 
